@@ -35,6 +35,10 @@
 .vs/
 .vsconfig
 
+#Jetbrain 
+
+.idea/
+
 # Gradle cache directory
 .gradle/
 
