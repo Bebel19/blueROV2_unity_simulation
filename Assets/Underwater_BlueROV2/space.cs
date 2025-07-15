@@ -1,25 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Binary toggle using the spacebar key.
+/// Used as a global flag for switching modes (e.g., enabling/disabling control).
+/// </summary>
 public class space : MonoBehaviour
 {
-    // Start is called before the first frame update
     public int space_is = 1;
-    void Start()
-    {
-        if (Input.GetKeyDown(KeyCode.Space)){
-            if (space_is == 0) space_is = 1;
-            else space_is = 0;
-        }
-    }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space)){
-            if (space_is == 0) space_is = 1;
-            else space_is = 0;
+        // Toggle between 0 and 1 on spacebar press
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            space_is = (space_is == 0) ? 1 : 0;
         }
     }
 }

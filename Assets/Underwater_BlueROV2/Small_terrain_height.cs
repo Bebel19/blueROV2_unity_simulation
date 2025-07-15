@@ -1,32 +1,40 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Continuously reads the Unity terrain elevation at the GameObject’s X/Z position
+/// and stores the height in Terrain_height. Used for reference altitude.
+/// </summary>
 public class Small_terrain_height : MonoBehaviour
 {
-    // Start is called before the first frame update
     public Vector3 position;
     public float Terrain_height;
 
-
     public Terrain terrain;
 
-
-	
-    void Start()
-    {   // position = this.transform.position;     //現在の位置を取得
+    private void Start()
+    {
+        // Get reference to active terrain in the scene
         terrain = Terrain.activeTerrain;
-        position = this.transform.position;
-        Terrain_height = terrain.terrainData.GetInterpolatedHeight(position.x / terrain.terrainData.size.x, position.z / terrain.terrainData.size.z);
+
+        // Get initial GameObject position
+        position = transform.position;
+
+        // Retrieve terrain height at this X/Z position
+        Terrain_height = terrain.terrainData.GetInterpolatedHeight(
+            position.x / terrain.terrainData.size.x,
+            position.z / terrain.terrainData.size.z
+        );
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        position = this.transform.position;
-       
-        //  posisionのx,z座標に対応する、terrainの高さ（y座標）を取得
-        Terrain_height = terrain.terrainData.GetInterpolatedHeight(position.x / terrain.terrainData.size.x, position.z / terrain.terrainData.size.z);
-        //this.transform.position=new Vector3(position.x, Terrain_height+add_height, position.z);
+        // Update position every physics frame
+        position = transform.position;
+
+        // Retrieve terrain height at current X/Z position
+        Terrain_height = terrain.terrainData.GetInterpolatedHeight(
+            position.x / terrain.terrainData.size.x,
+            position.z / terrain.terrainData.size.z
+        );
     }
 }

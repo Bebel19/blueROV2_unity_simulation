@@ -1,52 +1,56 @@
 using UnityEngine;
-using System.Collections;
 using System.IO.Ports;
 using System.Threading;
 
+/// <summary>
+/// Manages asynchronous serial communication via a background thread.
+/// Triggers OnDataReceived event when new data is available.
+/// </summary>
 public class SerialHandler : MonoBehaviour
 {
     public delegate void SerialDataReceivedEventHandler(string message);
     public event SerialDataReceivedEventHandler OnDataReceived;
 
-    //ポート名
-    //例
-    //Linuxでは/dev/ttyUSB0
-    //windowsではCOM1
-    //Macでは/dev/tty.usbmodem1421など
+    [Tooltip("Serial port name. Example: COM5 (Windows), /dev/ttyUSB0 (Linux)")]
     public string portName = "COM5";
-    public int baudRate    = 115200;
+
+    [Tooltip("Baud rate for the serial connection")]
+    public int baudRate = 115200;
 
     private SerialPort serialPort_;
     private Thread thread_;
     private bool isRunning_ = false;
 
     private string message_;
-    private string message_buf;
+    private string messageBuffer_;
     private bool isNewMessageReceived_ = false;
 
-    void Awake()
+    private void Awake()
     {
         Open();
     }
 
-    void Update()
+    private void Update()
     {
-        if (isNewMessageReceived_) {
-            OnDataReceived(message_);
+        // If a new message has been received, invoke the callback event
+        if (isNewMessageReceived_)
+        {
+            OnDataReceived?.Invoke(message_);
         }
         isNewMessageReceived_ = false;
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         Close();
     }
 
+    /// <summary>
+    /// Opens the serial port and starts the read thread.
+    /// </summary>
     private void Open()
     {
         serialPort_ = new SerialPort(portName, baudRate, Parity.None, 8, StopBits.One);
-         //または
-         //serialPort_ = new SerialPort(portName, baudRate);
         serialPort_.Open();
 
         isRunning_ = true;
@@ -55,41 +59,59 @@ public class SerialHandler : MonoBehaviour
         thread_.Start();
     }
 
+    /// <summary>
+    /// Closes the serial port and terminates the read thread safely.
+    /// </summary>
     private void Close()
     {
         isNewMessageReceived_ = false;
         isRunning_ = false;
 
-        if (thread_ != null && thread_.IsAlive) {
+        if (thread_ != null && thread_.IsAlive)
+        {
             thread_.Join();
         }
 
-        if (serialPort_ != null && serialPort_.IsOpen) {
+        if (serialPort_ != null && serialPort_.IsOpen)
+        {
             serialPort_.Close();
             serialPort_.Dispose();
         }
     }
 
+    /// <summary>
+    /// Continuously reads incoming serial data in a background thread.
+    /// </summary>
     private void Read()
     {
-        while (isRunning_ && serialPort_ != null && serialPort_.IsOpen) {
-            try {
-                message_buf = serialPort_.ReadExisting();
-                message_ = message_buf + serialPort_.ReadLine();
+        while (isRunning_ && serialPort_ != null && serialPort_.IsOpen)
+        {
+            try
+            {
+                messageBuffer_ = serialPort_.ReadExisting();
+                message_ = messageBuffer_ + serialPort_.ReadLine();
 
                 isNewMessageReceived_ = true;
-            } catch (System.Exception e) {
-                Debug.LogWarning(e.Message);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"Serial read error: {e.Message}");
             }
         }
     }
 
+    /// <summary>
+    /// Sends a message string to the serial device.
+    /// </summary>
     public void Write(string message)
     {
-        try {
+        try
+        {
             serialPort_.Write(message);
-        } catch (System.Exception e) {
-            Debug.LogWarning(e.Message);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"Serial write error: {e.Message}");
         }
     }
 }

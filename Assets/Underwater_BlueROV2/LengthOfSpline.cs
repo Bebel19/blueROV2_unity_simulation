@@ -4,30 +4,20 @@ using UnityEngine.Splines;
 
 public class LengthOfSpline : MonoBehaviour
 {
-    // スプライン
+    // Reference to the spline container
     [SerializeField] private SplineContainer _splineContainer;
 
-    // スプラインに沿って移動させる対象
-    // [SerializeField] private Transform _followTarget;
-
+    // Output: total spline length
     public float lengthOFspline;
-    // 始点から進む距離
-    // [SerializeField] private float _distanceFromStart;
 
     private void Update()
     {
-        // 念のためNullチェック
-        if (_splineContainer == null)// || _followTarget == null)
+        // Null check for safety
+        if (_splineContainer == null)
             return;
 
-        // 全体の道のり計算
+        // Calculate total arc length of the spline
         var length = _splineContainer.CalculateLength();
         lengthOFspline = length;
-
-        // 進む距離と道のりから割合を算出
-        // var percentage = _distanceFromStart / length;
-
-        // 位置反映
-        // _followTarget.position = _splineContainer.EvaluatePosition(percentage);
     }
 }

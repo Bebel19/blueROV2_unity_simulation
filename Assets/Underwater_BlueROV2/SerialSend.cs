@@ -1,42 +1,56 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
+/// <summary>
+/// SerialSend formats and sends control signals to an external device via SerialHandler.
+/// Data includes forward/backward command, lateral (yaw) command, and vision-based confidence.
+/// </summary>
 public class SerialSend : MonoBehaviour
 {
-    //SerialHandler.cのクラス
     public SerialHandler serialHandler;
-    public CreateTexture CreTex2;
-    public IOC_control IOCC;
-    int i = 0;
+
+    // Source for visual confidence (e.g., from image processing)
+    public CreateTexture createTexture;
+
+    // IOC controller providing joystick-related inputs
+    public IOC_control iocController;
+
     [Range(0, 1)]
     public int flag = 0;
+
     public int joy_move_lateral;
 
-    void FixedUpdate() //ここは0.001秒ごとに実行される
+    private int sendFrameCounter = 0;
+
+    private void FixedUpdate()
     {
-        float conf = CreTex2.confidence;
-        if (conf > 15.0f) conf = 15.0f;
-        if (flag != 0){
-            if (IOCC.Kill_switch == 1){
-                conf = 35.0f;
-            }else{
-                conf = 60.0f;
-            }
-        }
-        
-        string send_conf = conf.ToString();
-        joy_move_lateral = (int)((IOCC.joy_send_angle) * 408.0f / 1.2f + 482.0f); // signal = 1.2f * (joy_pos.z - 482.0f) / 408.0f;
-        string send_joy_move_lateral = joy_move_lateral.ToString();   //iを加算していって1秒ごとに"1"のシリアル送信を実行
-        int joy_move_for = -(int)((float)IOCC.Kill_switch * 390.0f - 505.0f); //-1.0f * (joy_pos.x - 505.0f) / 390.0f;
-        string send_joy_move_for = joy_move_for.ToString();   //iを加算していって1秒ごとに"1"のシリアル送信を実行
-        i++;
-        if (i > 2) //
+        // Read confidence from vision module
+        float confidence = createTexture.confidence;
+        confidence = Mathf.Min(confidence, 15.0f);  // Clamp to maximum 15
+
+        // Override confidence based on flag and kill switch
+        if (flag != 0)
         {
-            string sending = send_joy_move_for + "," + send_joy_move_lateral + "," + send_conf + "\n";
-            serialHandler.Write(sending);
-            i = 0;
+            confidence = (iocController.Kill_switch == 1) ? 35.0f : 60.0f;
+        }
+
+        // Map joy_send_angle (yaw control) to lateral servo signal
+        joy_move_lateral = (int)(iocController.joy_send_angle * 408.0f / 1.2f + 482.0f);
+        string sendJoyLateral = joy_move_lateral.ToString();
+
+        // Map Kill_switch (forward control) to forward servo signal
+        int joy_move_forward = -(int)(iocController.Kill_switch * 390.0f - 505.0f);
+        string sendJoyForward = joy_move_forward.ToString();
+
+        // Convert confidence to string
+        string sendConfidence = confidence.ToString();
+
+        // Send data every 3 FixedUpdate() calls
+        sendFrameCounter++;
+        if (sendFrameCounter > 2)
+        {
+            string message = $"{sendJoyForward},{sendJoyLateral},{sendConfidence}\n";
+            serialHandler.Write(message);
+            sendFrameCounter = 0;
         }
     }
 }
