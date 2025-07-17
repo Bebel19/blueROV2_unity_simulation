@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Underwater_BlueROV2;
 
 /// <summary>
 /// Implements inverse optimal control (IOC) for shared angular command correction.
@@ -10,7 +11,7 @@ using UnityEngine.UI;
 public class IOC_control : MonoBehaviour
 {
     public CreateTexture CreTex;           // Provides visual errors and confidence
-    public Joystick_inputs JSI;            // Provides joystick inputs and user confidence
+    public InputManager inputManager; // New: for unified input access // Provides joystick inputs
     [SerializeField] private ROV_dynamics RD; // Access to current angular velocity
     [SerializeField] private space SP;     // Provides kill switch toggle (0 or 1)
 
@@ -47,12 +48,11 @@ public class IOC_control : MonoBehaviour
         // Initial error estimation
         error_y = CreTex.errory_mat / 100.0f;
         error_angle = CreTex.errorag_mat * Mathf.Deg2Rad;
-        Vel = JSI.inputs.x;
-
+        Vel = inputManager.GetInputs().x;
         float result;
 
         // Shared control weight based on confidence
-        beta = Kill_switch * Mathf.Atan(error_y) * Mathf.Min(JSI.confidence, 1.0f);
+        beta = (float)Kill_switch * Mathf.Atan(error_y);
 
         sys_conf = CreTex.confidence;
 
@@ -93,12 +93,12 @@ public class IOC_control : MonoBehaviour
         // Error update
         error_y = CreTex.errory_mat / 100.0f;
         error_angle = CreTex.errorag_mat * Mathf.Deg2Rad;
-        Vel = JSI.inputs.x;
+        Vel = inputManager.GetInputs().x;
 
         float result;
 
         // Shared control weight (beta) modulated by confidence
-        beta = Kill_switch * Mathf.Atan(error_y) * Mathf.Min(JSI.confidence, 1.0f);
+        beta = (float)Kill_switch * Mathf.Atan(error_y);
         sys_conf = CreTex.confidence;
 
         float CosErr = Mathf.Cos(error_angle);

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Underwater_BlueROV2;
 
 /// <summary>
 /// Main 6-DOF PID controller for the BlueROV2.
@@ -8,8 +9,8 @@ using UnityEngine;
 /// </summary>
 public class Controller : MonoBehaviour
 {
-    public Small_terrain_height Terra_H;
-    public Joystick_inputs JI;
+    public InputManager inputManager; // Reference to the active input manager (Gamepad or Joystick)
+    public Small_terrain_height Terra_H; 
     public IOC_control IOOC;
 
     public float Tall = 2.0f;
@@ -174,12 +175,15 @@ public class Controller : MonoBehaviour
         G[5] = 0.0f;
 
         // Initial velocity estimate
-        nu_now[0] = JI.inputs.x * Mathf.Cos(IOOC.beta);
-        nu_now[1] = JI.inputs.x * Mathf.Sin(IOOC.beta);
-        nu_now[2] = JI.inputs.z;
+        Vector3 controlInputs = inputManager.GetInputs();
+        float controlAngle = inputManager.GetAngle();
+        
+        nu_now[0] = controlInputs.x * Mathf.Cos(IOOC.beta);
+        nu_now[1] = controlInputs.x * Mathf.Sin(IOOC.beta);
+        nu_now[2] = controlInputs.z;
         nu_now[3] = 0.0f;
         nu_now[4] = 0.0f;
-        nu_now[5] = JI.angle;
+        nu_now[5] = controlAngle;
 
         // Store initial values for derivative
         for (i = 0; i < 6; i++)
@@ -278,13 +282,17 @@ public class Controller : MonoBehaviour
         G[5] = 0.0f;
 
         // Add PID correction to joystick commands
-        nu_now[0] = JI.inputs.x * Mathf.Cos(IOOC.beta) + PID_nu[0];
-        nu_now[1] = JI.inputs.x * Mathf.Sin(IOOC.beta) + PID_nu[1];
-        nu_now[2] = JI.inputs.z + PID_nu[2];
+        Vector3 controlInputs = inputManager.GetInputs();
+        float controlAngle = inputManager.GetAngle();
+
+        nu_now[0] = controlInputs.x * Mathf.Cos(IOOC.beta) + PID_nu[0];
+        nu_now[1] = controlInputs.x * Mathf.Sin(IOOC.beta) + PID_nu[1];
+        nu_now[2] = controlInputs.z + PID_nu[2];
         nu_now[3] = 0.0f;
         nu_now[4] = 0.0f;
-        nu_now[5] = JI.angle;
-
+        nu_now[5] = controlAngle;
+        
+        
         // Compute Coriolis
         C_nu[0] = -(M_A[2] + mass) * nu_now[5] * nu_now[1] + (M_A[1] + mass) * nu_now[4] * nu_now[2];
         C_nu[1] = (M_A[2] + mass) * nu_now[5] * nu_now[0] - (M_A[0] + mass) * nu_now[3] * nu_now[2];
