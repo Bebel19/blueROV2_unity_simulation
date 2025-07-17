@@ -9,8 +9,6 @@ namespace Underwater_BlueROV2
     /// </summary>
     public class InputManager : MonoBehaviour, IInputProvider
     {
-        [Tooltip("Reference to the serial joystick input handler")]
-        public Joystick_inputs joystick;
 
         [Tooltip("Reference to the gamepad input handler")]
         public GamepadInput gamepad;
@@ -19,22 +17,7 @@ namespace Underwater_BlueROV2
 
         void Start()
         {
-            // Try opening COM5 to decide which input source to use
-            try
-            {
-                using (SerialPort sp = new SerialPort("COM5", 9600))
-                {
-                    sp.Open();
-                    sp.Close();
-                    useJoystick = true;
-                    Debug.Log("Using Joystick (COM5)");
-                }
-            }
-            catch
-            {
-                useJoystick = false;
-                Debug.Log("Using Gamepad");
-            }
+            
         }
 
         void Update()
@@ -45,13 +28,13 @@ namespace Underwater_BlueROV2
         /// <summary>Gets the current inputs from the active provider.</summary>
         public Vector3 GetInputs()
         {
-            return useJoystick ? joystick.inputs : gamepad.GetInputs();
+            return gamepad.GetInputs();
         }
 
         /// <summary>Gets the current angle from the active provider.</summary>
         public float GetAngle()
         {
-            return useJoystick ? joystick.angle : gamepad.GetAngle();
+            return gamepad.GetAngle();
         }
     }
 }
