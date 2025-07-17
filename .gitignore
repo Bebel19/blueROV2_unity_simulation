@@ -105,3 +105,6 @@ InitTestScene*.unity*
 
 # OpenCVForUnity
 /[Aa]ssets/OpenCVForUnity
+
+# Various files
+tree.txt
