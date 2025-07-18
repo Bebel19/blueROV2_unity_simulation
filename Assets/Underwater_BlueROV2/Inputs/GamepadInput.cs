@@ -10,7 +10,7 @@ namespace Underwater_BlueROV2
     /// </summary>
 
 
-    public class GamepadInput : BaseInputHandler, IInputProvider
+    public class GamepadInput : BaseInputHandler
     {
         public override float[] GetFullInputVector()
         {
@@ -33,18 +33,7 @@ namespace Underwater_BlueROV2
                 rightTrigger // G2
             };
         }
-
-        public Vector3 GetInputs()
-        {
-            float[] v = GetFullInputVector();
-            return new Vector3(v[0], v[2], v[4]); // X1, Y1, G1
-        }
-
-        public float GetAngle()
-        {
-            float[] v = GetFullInputVector();
-            return v[1]; // X2 = roll (or yaw if used as such)
-        }
+        
 
     }
 
