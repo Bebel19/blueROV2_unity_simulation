@@ -4,37 +4,60 @@ using System.IO.Ports;
 namespace Underwater_BlueROV2
 {
     /// <summary>
-    /// Manages the active input provider, switching between serial joystick (COM5) and gamepad.
-    /// Attempts to open COM5 at startup; if successful, uses joystick, otherwise uses gamepad.
+    /// Manages which input device to use (joystick or gamepad) and delegates input access.
+    /// Attach either GamepadInput or MozaJoystickInput to the same GameObject.
+    /// TODO : Implemnent 1 and 2 joysticks
+    /// TODO : Implement Haptic feedback methods
     /// </summary>
-    public class InputManager : MonoBehaviour, IInputProvider
+    public class InputManager : MonoBehaviour
     {
+        // Choose in the Inspector whether to use joystick or gamepad input
+        [SerializeField] private bool useJoystick = false;
 
-        [Tooltip("Reference to the gamepad input handler")]
-        public GamepadInput gamepad;
+        // This will store the actual input handler (either a GamepadInput or MozaJoystickInput)
+        private BaseInputHandler inputHandler;
 
-        public bool useJoystick;
-
-        void Start()
+        /// <summary>
+        /// Called once when the script starts. It sets up the input handler.
+        /// </summary>
+        private void Awake()
         {
-            
+            // If the checkbox "useJoystick" is true, use Moza joystick input
+            if (useJoystick)
+            {
+                inputHandler = GetComponent<MozaJoystickInput>();
+                Debug.Log("Using MozaJoystickInput");
+
+            }
+            else // Otherwise, use standard gamepad input
+            {
+                inputHandler = GetComponent<GamepadInput>();
+                Debug.Log("Using GamepadInput");
+            }
+
+            // Safety check: make sure we found the input handler
+            if (inputHandler == null)
+            {
+                Debug.LogError("InputHandler not found. Did you attach the right input script to the GameObject?");
+            }
         }
 
-        void Update()
+        /// <summary>
+        /// Returns the full input vector (usually 6 values: X1, Y1, X2, Y2, G1, G2)
+        /// </summary>
+        public float[] GetInputs()
         {
-            // Optional: check COM5 at runtime if needed
+            float[] inputs = inputHandler.GetFullInputVector();
+            Debug.Log("[InputManager] J = [" + string.Join(", ", inputs) + "]");
+            return inputs;
         }
 
-        /// <summary>Gets the current inputs from the active provider.</summary>
-        public Vector3 GetInputs()
+        /// <summary>
+        /// Returns the reference to the active input handler (can be used to access advanced features)
+        /// </summary>
+        public BaseInputHandler GetInputHandler()
         {
-            return gamepad.GetInputs();
-        }
-
-        /// <summary>Gets the current angle from the active provider.</summary>
-        public float GetAngle()
-        {
-            return gamepad.GetAngle();
+            return inputHandler;
         }
     }
 }
