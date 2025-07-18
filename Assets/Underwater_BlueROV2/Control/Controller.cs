@@ -9,7 +9,8 @@ using Underwater_BlueROV2;
 /// </summary>
 public class Controller : MonoBehaviour
 {
-    public InputManager inputManager; // Reference to the active input manager (Gamepad or Joystick)
+    [SerializeField] private InputManager inputManager; // New: for unified input access // Provides the active input (Gamepad or Joystick)
+    [SerializeField] private MappingMatrix mapper; // Used to map the inputs J (Joystick or controller values) to a command vector U (target velocities)
     public Small_terrain_height Terra_H; 
     public IOC_control IOOC;
 
@@ -175,15 +176,14 @@ public class Controller : MonoBehaviour
         G[5] = 0.0f;
 
         // Initial velocity estimate
-        Vector3 controlInputs = inputManager.GetInputs();
-        float controlAngle = inputManager.GetAngle();
+        float[] U = mapper.GetMappedCommand(inputManager.GetInputs()); // Map the controller input to target speeds command vector U
         
-        nu_now[0] = controlInputs.x * Mathf.Cos(IOOC.beta);
-        nu_now[1] = controlInputs.x * Mathf.Sin(IOOC.beta);
-        nu_now[2] = controlInputs.z;
+        nu_now[0] = U[0] * Mathf.Cos(IOOC.beta);
+        nu_now[1] = U[0] * Mathf.Sin(IOOC.beta);
+        nu_now[2] = U[2];
         nu_now[3] = 0.0f;
         nu_now[4] = 0.0f;
-        nu_now[5] = controlAngle;
+        nu_now[5] = U[5];
 
         // Store initial values for derivative
         for (i = 0; i < 6; i++)
@@ -282,15 +282,15 @@ public class Controller : MonoBehaviour
         G[5] = 0.0f;
 
         // Add PID correction to joystick commands
-        Vector3 controlInputs = inputManager.GetInputs();
-        float controlAngle = inputManager.GetAngle();
+        float[] U = mapper.GetMappedCommand(inputManager.GetInputs()); // Map the controller input to target speeds command vector U
 
-        nu_now[0] = controlInputs.x * Mathf.Cos(IOOC.beta) + PID_nu[0];
-        nu_now[1] = controlInputs.x * Mathf.Sin(IOOC.beta) + PID_nu[1];
-        nu_now[2] = controlInputs.z + PID_nu[2];
+
+        nu_now[0] = U[0] * Mathf.Cos(IOOC.beta) + PID_nu[0];
+        nu_now[1] = U[0] * Mathf.Sin(IOOC.beta) + PID_nu[1];
+        nu_now[2] = U[2] + PID_nu[2];
         nu_now[3] = 0.0f;
         nu_now[4] = 0.0f;
-        nu_now[5] = controlAngle;
+        nu_now[5] = U[5];
         
         
         // Compute Coriolis

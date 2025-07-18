@@ -11,7 +11,8 @@ using Underwater_BlueROV2;
 public class IOC_control : MonoBehaviour
 {
     public CreateTexture CreTex;           // Provides visual errors and confidence
-    public InputManager inputManager; // New: for unified input access // Provides joystick inputs
+    [SerializeField] private InputManager inputManager; // New: for unified input access // Provides the active input (Gamepad or Joystick)
+    [SerializeField] private MappingMatrix mapper; // Used to map the inputs J (Joystick or controller values) to a command vector U (target velocities)
     [SerializeField] private ROV_dynamics RD; // Access to current angular velocity
     [SerializeField] private space SP;     // Provides kill switch toggle (0 or 1)
 
@@ -48,7 +49,7 @@ public class IOC_control : MonoBehaviour
         // Initial error estimation
         error_y = CreTex.errory_mat / 100.0f;
         error_angle = CreTex.errorag_mat * Mathf.Deg2Rad;
-        Vel = inputManager.GetInputs().x;
+        Vel = mapper.GetMappedCommand(inputManager.GetInputs())[0]; // Map the controller input to target speeds and i=O is the x translational speed
         float result;
 
         // Shared control weight based on confidence
@@ -93,7 +94,7 @@ public class IOC_control : MonoBehaviour
         // Error update
         error_y = CreTex.errory_mat / 100.0f;
         error_angle = CreTex.errorag_mat * Mathf.Deg2Rad;
-        Vel = inputManager.GetInputs().x;
+        Vel = mapper.GetMappedCommand(inputManager.GetInputs())[0]; // Map the controller input to target speeds and i=O is the x translational speed
 
         float result;
 
