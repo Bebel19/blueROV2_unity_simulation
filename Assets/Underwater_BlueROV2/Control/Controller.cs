@@ -177,9 +177,9 @@ public class Controller : MonoBehaviour
 
         // Initial velocity estimate
         float[] U = mapper.GetMappedCommand(inputManager.GetInputs()); // Map the controller input to target speeds command vector U
-        
-        nu_now[0] = U[0] * Mathf.Cos(IOOC.beta);
-        nu_now[1] = U[0] * Mathf.Sin(IOOC.beta);
+
+        nu_now[0] = U[0];
+        nu_now[1] = U[1];
         nu_now[2] = U[2];
         nu_now[3] = 0.0f;
         nu_now[4] = 0.0f;
@@ -285,9 +285,9 @@ public class Controller : MonoBehaviour
         float[] U = mapper.GetMappedCommand(inputManager.GetInputs()); // Map the controller input to target speeds command vector U
 
 
-        nu_now[0] = U[0] * Mathf.Cos(IOOC.beta) + PID_nu[0];
-        nu_now[1] = U[0] * Mathf.Sin(IOOC.beta) + PID_nu[1];
-        nu_now[2] = U[2] + PID_nu[2];
+        nu_now[0] = U[0];
+        nu_now[1] = U[1];
+        nu_now[2] = U[2];
         nu_now[3] = 0.0f;
         nu_now[4] = 0.0f;
         nu_now[5] = U[5];
