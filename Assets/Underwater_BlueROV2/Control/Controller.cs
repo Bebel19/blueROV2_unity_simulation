@@ -181,8 +181,8 @@ public class Controller : MonoBehaviour
         nu_now[0] = U[0];
         nu_now[1] = U[1];
         nu_now[2] = U[2];
-        nu_now[3] = 0.0f;
-        nu_now[4] = 0.0f;
+        nu_now[3] = U[3];
+        nu_now[4] = U[4];
         nu_now[5] = U[5];
 
         // Store initial values for derivative
@@ -288,8 +288,8 @@ public class Controller : MonoBehaviour
         nu_now[0] = U[0];
         nu_now[1] = U[1];
         nu_now[2] = U[2];
-        nu_now[3] = 0.0f;
-        nu_now[4] = 0.0f;
+        nu_now[3] = U[3];
+        nu_now[4] = U[4];
         nu_now[5] = U[5];
         
         
