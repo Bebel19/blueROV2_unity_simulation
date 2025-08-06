@@ -37,7 +37,7 @@ public class ROV_dynamics : MonoBehaviour
     private float Volume = 0.0135f;
     private float rho = 1000.0f;
     private float gravity = 9.82f;
-    private float z_b = -0.01f;
+    private float z_b = -0.02f;//-0.01f;            //Restoring force
 
     private float W, B;
 
