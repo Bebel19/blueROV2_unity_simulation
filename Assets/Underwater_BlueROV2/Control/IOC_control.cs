@@ -126,6 +126,6 @@ public class IOC_control : MonoBehaviour
         joy_send_angle = result;
 
         sw.Stop();
-        Debug.Log(sw.ElapsedMilliseconds);
+        Debug.Log($"[IOC_control] Elapsed {sw.ElapsedMilliseconds} ms");
     }
 }
